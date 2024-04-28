@@ -39,9 +39,10 @@ lsp.set_preferences({
 
 lsp.on_attach(function(client, bufnr)
   local opts = { buffer = bufnr, remap = false }
-  --client.resolved_capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = true
+  --client.resolved_capabilities.workspace.didchangewatchedfiles.dynamicregistration = true
   vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-  vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
+  vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format() end)
+  vim.keymap.set("n", "k", function() vim.lsp.buf.hover() end, opts)
   vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
   vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
   vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
@@ -49,22 +50,27 @@ lsp.on_attach(function(client, bufnr)
   vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
   vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
   vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
-  vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
+  vim.keymap.set("i", "<c-h>", function() vim.lsp.buf.signature_help() end, opts)
 end)
+
+local on_attach = function(client, bufnr)
+  local opts = { buffer = bufnr, remap = false }
+  vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
+  vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
+  vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
+  vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, opts)
+  vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
+  vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
+  vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
+  vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
+  vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
+  vim.keymap.set("i", "<c-h>", function() vim.lsp.buf.signature_help() end, opts)
+end
 
 lsp.setup()
 
 vim.diagnostic.config({
   virtual_text = true
-})
-lsp.set_server_config({
-  capabilities = {
-    workspace = {
-      didChangeWatchedFiles = {
-        dynamicRegistration = true
-      }
-    }
-  }
 })
 
 
@@ -81,14 +87,14 @@ nvim_lsp.tailwindcss.setup {
   },
 }
 require "cmp".setup {
-    sources = {
-        {
-            name = "nvim_lsp",
-            entry_filter = function(entry)
-                return require("cmp").lsp.CompletionItemKind.Snippet ~= entry:get_kind()
-            end
-        },
-    }
+  sources = {
+    {
+      name = "nvim_lsp",
+      entry_filter = function(entry)
+        return require("cmp").lsp.CompletionItemKind.Snippet ~= entry:get_kind()
+      end
+    },
+  }
 }
 
 
@@ -97,23 +103,20 @@ local result = vim.fn.systemlist("npm ls -g --depth=0")
 local location = string.format("%s/node_modules/@vue/typescript-plugin", result[1])
 
 -- if using mason, uncomment lines below
--- local is_mason = pcall(require, "mason")
--- location = is_mason and vim.fn.stdpath("data") .. "/mason/packages/vue-language-server/node_modules/@vue/typescript-plugin"
+local is_mason = pcall(require, "mason")
+--location = is_mason and vim.fn.stdpath("data") .. "/mason/packages/vue-language-server/node_modules/@vue/typescript-plugin"
+
 
 if vim.fn.isdirectory(location) == 1 then
-  -- Ensure @vue/typescript-plugin is installed
-  -- before setting up tsserver
   require("lspconfig").tsserver.setup({
-    -- on_attach = on_attach,
-    -- capabilities = capabilities,
-    root_dir = require("lspconfig.util").root_pattern("src/App.vue", "nuxt.config.ts", "nuxt.config.js"),
     filetypes = { "vue", "typescript", "javascript", "json" },
+    on_attach = on_attach,
     init_options = {
       plugins = {
         {
           name = "@vue/typescript-plugin",
           location = location,
-          languages = { "vue" },
+          languages = { "vue", "javascript", "typescript" },
         },
       },
     },
@@ -123,3 +126,7 @@ else
     "@vue/typescript-plugin is required, install globally via `npm install -g @vue/typescript-plugin`"
   )
 end
+require("lspconfig").volar.setup {
+  on_attach = on_attach,
+  filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue', 'json' }
+}
