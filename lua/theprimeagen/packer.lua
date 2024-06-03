@@ -41,6 +41,9 @@ return require('packer').startup(function(use)
   use("mbbill/undotree")
   use("tpope/vim-fugitive")
   use("nvim-treesitter/nvim-treesitter-context");
+  use("tpope/vim-dadbod")
+  use("kristijanhusak/vim-dadbod-ui")
+  use("kristijanhusak/vim-dadbod-completion")
 
   use {
 	  'VonHeikemen/lsp-zero.nvim',
@@ -69,6 +72,8 @@ return require('packer').startup(function(use)
   use("github/copilot.vim")
   use("eandrju/cellular-automaton.nvim")
   use("laytan/cloak.nvim")
-
+  use("tpope/vim-dotenv")
+  use("ray-x/go.nvim")
+  use("ray-x/guihua.lua") -- recommended if need floating window support
 end)
 
