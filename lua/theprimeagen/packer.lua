@@ -9,6 +9,11 @@ return require('packer').startup(function(use)
   use('neovim/nvim-lspconfig')
   use('jose-elias-alvarez/null-ls.nvim')
   use('MunifTanjim/prettier.nvim')
+  use({
+    "iamcco/markdown-preview.nvim",
+    run = function() vim.fn["mkdp#util#install"]() end,
+  })
+
 
   use {
 	  'nvim-telescope/telescope.nvim', tag = '0.1.4',
